@@ -37,7 +37,7 @@ myEmitter.on("buyHandler", async (trade) => {
 
     let sellPrice = buyPrice * ((100 + Ticker.sellPercentage) / 100);
     console.log(symbol,quantity,+sellPrice.toFixed(Ticker?.fixed))
-    await binance.futuresSell("DOTUSDT", quantity, sellPrice.toFixed(Ticker?.fixed));
+    await binance.futuresSell(symbol, quantity, sellPrice.toFixed(Ticker?.fixed));
   } catch (error) {
     console.log(error);
     console.log("Failed to create limit sell order");
