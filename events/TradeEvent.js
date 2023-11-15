@@ -101,7 +101,7 @@ myEmitter.on("SellHandler", async (trade) => {
     
 
   } catch (error) {
-    console.log(error);
+    console.log(error?.message);
     // console.log("Failed to create limit sell order");
 
     return;
