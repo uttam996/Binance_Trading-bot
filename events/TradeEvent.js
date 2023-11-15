@@ -82,12 +82,12 @@ myEmitter.on("SellHandler", async (trade) => {
       });
     console.log(pendingOrders,'pendingOrders')
     if (pendingOrders.length === 0) {
-      await binance.marketBuy(symbol, quantity);
+      await binance.futuresMarketBuy(symbol, quantity);
     }
     else{
       await binance.futuresBuy(symbol,quantity,buyPrice.toFixed(Ticker?.fixed))
 
-      
+
       
 
 
