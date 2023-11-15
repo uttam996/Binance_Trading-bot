@@ -36,8 +36,12 @@ myEmitter.on("buyHandler", async (trade) => {
     console.log(buyPrice,quantity,Ticker.sellPercentage)
 
     let sellPrice = buyPrice * ((100 + Ticker.sellPercentage) / 100);
-    console.log(symbol,quantity,+sellPrice.toFixed(Ticker?.fixed))
+    let limitbuyPrice = buyPrice * ((100 - Ticker.buyPercentage) / 100);
+    // console.log(symbol,quantity,+sellPrice.toFixed(Ticker?.fixed))
     await binance.futuresSell(symbol, quantity, sellPrice.toFixed(Ticker?.fixed));
+    console.log('limit sell',symbol,quantity )
+    await binance.futuresBuy(symbol, quantity, limitbuyPrice.toFixed(Ticker?.fixed));
+    console.log('limit buy',symbol,quantity )
   } catch (error) {
     console.log(error);
     console.log("Failed to create limit sell order");
@@ -56,7 +60,9 @@ myEmitter.on("SellHandler", async (trade) => {
     // find trade entry with lowest buy price and sell it
 
     const { i: orderId, s: symbol, q: quantity, L: sellPrice } = trade;
-    const order = await Trades.findOne({ Symbol: trade.s }).sort({ buyPrice: 1 });
+    const order = await Trades.findOne({ Symbol: trade.s,
+    sellPrice:{ $exists: false}
+    }).sort({ buyPrice: 1 });
 
     order.sellPrice = sellPrice;
     order.sellQuantity = quantity;
@@ -69,12 +75,33 @@ myEmitter.on("SellHandler", async (trade) => {
     if (Ticker.running === false) return console.log("Ticker is Off ");
     const buyPrice = sellPrice - (sellPrice* Ticker.buyPercentage)/100
     console.log(symbol,quantity,buyPrice)
-    await binance.futuresBuy(symbol,quantity,buyPrice.toFixed(Ticker?.fixed))
+   
+
+    const pendingOrders = await Trades.find({ Symbol: trade.s,
+      sellPrice:{ $exists: false}
+      });
+    console.log(pendingOrders,'pendingOrders')
+    if (pendingOrders.length === 0) {
+      await binance.marketBuy(symbol, quantity);
+    }
+    else{
+      await binance.futuresBuy(symbol,quantity,buyPrice.toFixed(Ticker?.fixed))
+
+      
+      
+
+
+      
+      // await binance.futuresCancelAll(symbol)
+     
+
+
+    }
     
     
 
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
     // console.log("Failed to create limit sell order");
 
     return;

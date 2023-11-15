@@ -52,7 +52,7 @@ const sync = async () => {
       // update account settings
      } else if (parsedData.e === "ORDER_TRADE_UPDATE") {
       let trade = parsedData.o;
-      console.log(trade)
+      // console.log(trade)
   
       // if (trade.x === "NEW") {
       //  addOpenOrder(trade.s, trade.i + "", trade.p, trade.S.toLowerCase());
@@ -92,6 +92,8 @@ const sync = async () => {
   
   
 };
+
+
 
 
 // export binance here 

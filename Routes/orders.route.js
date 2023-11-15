@@ -23,8 +23,9 @@ OrderRouter.get('/profit',async(req,res)=>{
                     totalProfit:{
                         $sum:{
                             $subtract:[
-                                { $multiply: [ "$buyPrice", "$buyQuantity" ] },
+                               
                                 { $multiply: [ "$sellPrice", "$buyQuantity" ] },
+                                { $multiply: [ "$buyPrice", "$buyQuantity" ] },
 
                             ]
                         }
@@ -42,6 +43,31 @@ OrderRouter.get('/profit',async(req,res)=>{
     }
 
 })
+
+const pendingOrders =async ()=>{
+    try {
+        const pending = await Trades.find({
+            sellPrice:{
+                $ne:null
+            }
+        })
+
+        let profit=0
+        pending.forEach((el)=>{
+            profit +=   el.sellPrice*el.sellQuantity-el.buyPrice*el.buyQuantity  
+
+        })
+
+        console.log(pending)
+        console.log(profit)
+        
+    } catch (error) {
+        console.log(error)
+        
+    }
+
+}
+pendingOrders()
 
 
 
