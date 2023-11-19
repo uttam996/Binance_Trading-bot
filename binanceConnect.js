@@ -94,6 +94,25 @@ const sync = async () => {
 };
 
 
+(async () => {
+  // await sync();
+  let  opentrades = await binance.futuresOpenOrders("MATICUSDT");
+  opentrades = opentrades.filter((trade) => trade.side === "BUY").sort((a, b) => a.price - b.price);
+  if(opentrades.length <= 1) return;
+  //remove last trade
+  opentrades.pop();
+ 
+
+
+  console.log(opentrades);
+  for(let trade of opentrades){
+    await binance.futuresCancel("MATICUSDT",{orderId:trade.orderId})
+    
+  }
+
+
+})();
+
 
 
 // export binance here 

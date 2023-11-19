@@ -24,8 +24,9 @@ app.get('/', (req, res) => {
 app.use('/tickers',TickerRouter)
 app.use('/order',OrderRouter)
 
+
 app.listen(process.env.PORT, () => {
-    console.log('Example app listening on port 3000!');
+    console.log(`Example app listening on port ${process.env.PORT}`);
 });
 
 

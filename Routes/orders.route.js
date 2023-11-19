@@ -2,46 +2,87 @@ const express = require('express')
 const Trades = require('../Model/trades.model')
 const OrderRouter =express.Router()
 
-OrderRouter.get('/',async(req,res)=>{
-    try {
-        const order = await Trades.find({})
-        
-        return res.send(order) 
 
-    } catch (error) {
-        return res.send(error.message)
-        
-    }
-})
 
-OrderRouter.get('/profit',async(req,res)=>{
+OrderRouter.get('/profit', async (req, res) => {
     try {
+        // get profit of today and all time
         const profit = await Trades.aggregate([
             {
-                $group:{
-                    _id:null,
-                    totalProfit:{
-                        $sum:{
-                            $subtract:[
-                               
-                                { $multiply: [ "$sellPrice", "$buyQuantity" ] },
-                                { $multiply: [ "$buyPrice", "$buyQuantity" ] },
-
+                $match: {
+                    sellPrice: {
+                        $ne: null
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    Alltime: {
+                        $sum: {
+                            $subtract: [
+                                { $multiply: ["$sellPrice", "$sellQuantity"] },
+                                { $multiply: ["$buyPrice", "$buyQuantity"] }
                             ]
                         }
-                    
+                    },
+                    today: {
+                        $sum: {
+                            $cond: [
+                                { $gte: ["$createdAt", new Date(new Date().setHours(0, 0, 0, 0))] },
+                                {
+                                    $subtract: [
+                                        { $multiply: ["$sellPrice", "$sellQuantity"] },
+                                        { $multiply: ["$buyPrice", "$buyQuantity"] }
+                                    ]
+                                },
+                                0
+                            ]
+                        }
                     }
                 }
             }
         ])
+        return res.status(200).send(profit[0])
 
-        return res.send(profit)
+    } catch (error) {
+        return res.send(error.message)
+
+    }
+
+})
+
+OrderRouter.get('/open', async (req, res) => {
+    try {
+        const open = await Trades.find({
+            sellPrice: null
+        })
+        return res.send(open)
+
+    
+        // handle today endpoint logic here
+        
+
+    } catch (error) {
+        return res.send(error.message)
+
+    }
+
+})
+
+OrderRouter.get('/completed',async(req,res)=>{
+    try {
+        const completed = await Trades.find({
+            sellPrice:{
+                $ne:null
+            }
+        })
+        return res.send(completed)
         
     } catch (error) {
         return res.send(error.message)
         
     }
-
 })
 
 const pendingOrders =async ()=>{
@@ -67,7 +108,7 @@ const pendingOrders =async ()=>{
     }
 
 }
-pendingOrders()
+// pendingOrders()
 
 
 
