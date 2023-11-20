@@ -52,11 +52,54 @@ OrderRouter.get('/profit', async (req, res) => {
 
 })
 
+OrderRouter.get('/profit/daily', async (req, res) => {
+    try {
+        const dailyprofit = await Trades.aggregate([
+            {
+                $match: {
+                    sellPrice: {
+                        $ne: null
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$createdAt"
+                        }
+                    },
+                    profit: {
+                        $sum: {
+                            $subtract: [
+                                { $multiply: ["$sellPrice", "$sellQuantity"] },
+                                { $multiply: ["$buyPrice", "$buyQuantity"] }
+                            ]
+                        }
+                    }
+                }
+            }
+        
+        ])
+
+        return res.status(200).send(dailyprofit)
+
+        
+    } catch (error) {
+        return res.send(error.message)
+        
+    }
+})
+
 OrderRouter.get('/open', async (req, res) => {
     try {
+        const page = parseInt(req.query.page) || 0
+        const limit = parseInt(req.query.limit) || 10
+
         const open = await Trades.find({
             sellPrice: null
-        })
+        }).sort({ createdAt: -1 }).skip(page * limit ).limit(limit)
         return res.send(open)
 
     

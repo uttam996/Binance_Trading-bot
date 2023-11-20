@@ -25,7 +25,9 @@ TickerRouter.patch('/update',async(req,res)=>{
         if(!buyPercentage) return res.status(400).send('Please provide buyPercentage')
         if(!sellPercentage) return res.status(400).send('Please provide sellPercentage')
         if(!running) return res.status(400).send('Please provide running')
-        if(!fixed) return res.status(400).send('Please provide fixed')
+        // if(!fixed) return res.status(400).send('Please provide fixed')
+
+        console.log(req.body)
         const ticker = await Ticker.findByIdAndUpdate(_id,{
             symbol,
             quantity,
